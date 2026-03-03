@@ -13,6 +13,7 @@
 body {
   background-color: #f9fafb;
   font-family: "Merriweather", serif;
+  overflow: hidden;
 }
 
 button,

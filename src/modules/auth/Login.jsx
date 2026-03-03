@@ -209,11 +209,13 @@ const Login = () => {
   );
 };
 /* ---------------- STYLES ---------------- */
+/* ---------------- STYLES ---------------- */
 
 const pageWrapper = {
-  minHeight: "100vh",
-  width: "100%",
+  height: "100vh",
+  width: "100vw",
   display: "flex",
+  overflow: "hidden",
   fontFamily: "Inter, sans-serif",
 };
 
@@ -224,7 +226,7 @@ const leftSection = {
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  padding: "60px",
+  padding: "40px",
   color: "#ffffff",
 };
 
@@ -234,50 +236,50 @@ const rightSection = {
   alignItems: "center",
   justifyContent: "center",
   backgroundColor: "#f8f9fc",
-  padding: "60px",
+  padding: "40px",
 };
 
 const imageStyle = {
-  width: "85%",
-  maxWidth: "500px",
-  marginBottom: "30px",
+  width: "70%",
+  maxWidth: "420px",
+  height: "auto",
+  marginBottom: "20px",
 };
 
 const loginContainer = {
   width: "100%",
-  maxWidth: "420px",
+  maxWidth: "380px",
 };
 
 const headerSection = {
   textAlign: "center",
-  marginBottom: "25px",
+  marginBottom: "20px",
 };
 
 const titleStyle = {
   margin: 0,
-  fontSize: "26px",
+  fontSize: "24px",
   fontWeight: "700",
   color: "#111111",
 };
 
 const subtitleStyle = {
   color: "#6c757d",
-  fontSize: "14px",
-  marginTop: "6px",
+  fontSize: "13px",
+  marginTop: "5px",
 };
 
 const forgotPasswordWrapper = {
   display: "flex",
   justifyContent: "flex-end",
-  marginTop: "6px",
-  marginBottom: "20px",
+  marginTop: "4px",
+  marginBottom: "15px",
 };
 
 const forgotLinkStyle = {
   cursor: "pointer",
   color: "#000000",
-  fontSize: "13px",
+  fontSize: "12px",
   fontWeight: "600",
 };
-
 export default Login;
