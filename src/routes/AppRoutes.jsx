@@ -56,11 +56,13 @@ const AppRoutes = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/documents" element={<Documents />} />
           <Route path="/support" element={<SupportPage  />} />
+
         </Route>
+                        <Route path="*" element={<NotFound />} />
+
       </Route>
 
       {/* 404 */}
-      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
