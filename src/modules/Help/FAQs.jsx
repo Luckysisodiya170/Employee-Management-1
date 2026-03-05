@@ -8,6 +8,7 @@ const FAQs = ({ isDarkTheme }) => {
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState(null); 
+
   useEffect(() => {
     const fetchFAQs = async () => {
       try {
@@ -31,75 +32,93 @@ const FAQs = ({ isDarkTheme }) => {
   const theme = {
     text: isDarkTheme ? colors.textLight : colors.textMain,
     muted: isDarkTheme ? colors.darkMuted : colors.textMuted,
-    cardBg: isDarkTheme ? colors.darkHover : "#ffffff",
+    cardBg: isDarkTheme ? "rgba(255, 255, 255, 0.03)" : "#f8fafc",
     border: isDarkTheme ? colors.darkBorder : "#e2e8f0",
+    questionColor: isDarkTheme ? "#ffffff" : "#1e293b",
   };
 
+  // Loading State UI
   if (loading) {
-    return <div style={{ textAlign: "center", padding: "20px", color: theme.muted, fontSize: "13px" }}>Loading FAQs...</div>;
+    return (
+      <div style={{ textAlign: "center", padding: "40px", color: theme.muted, fontSize: "14px", fontWeight: "500" }}>
+        Loading FAQs...
+      </div>
+    );
   }
 
+  // Empty State UI
   if (faqs.length === 0) {
     return (
-      <div style={{ textAlign: "center", padding: "40px 10px", color: theme.muted }}>
-        <MdHelpOutline size={40} style={{ opacity: 0.3, marginBottom: "10px" }} />
-        <p style={{ margin: 0, fontSize: "13px" }}>No FAQs available at the moment.</p>
+      <div style={{ textAlign: "center", padding: "60px 20px", color: theme.muted, display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+        <MdHelpOutline size={48} style={{ opacity: 0.4 }} />
+        <p style={{ margin: 0, fontSize: "15px", fontWeight: "500" }}>No FAQs available at the moment.</p>
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-      {faqs.map((faq) => {
-        const isOpen = openId === faq.faq_id;
-        return (
-          <div 
-            key={faq.faq_id} 
-            style={{ 
-              background: theme.cardBg, 
-              border: `1px solid ${theme.border}`, 
-              borderRadius: "8px", 
-              overflow: "hidden",
-              transition: "all 0.3s ease"
-            }}
-          >
-            {/* Question Header */}
+    <div style={{ padding: "10px" }}>
+      {/* Header Section */}
+      <h2 style={{ color: theme.text, fontSize: "20px", marginBottom: "8px", marginTop: 0, fontWeight: "700" }}>Frequently Asked Questions</h2>
+      <p style={{ color: theme.muted, fontSize: "14px", marginBottom: "24px" }}>
+        Find answers to common questions about our platform and policies.
+      </p>
+
+      {/* Accordion List */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {faqs.map((faq) => {
+          const isOpen = openId === faq.faq_id;
+          return (
             <div 
-              onClick={() => toggleFAQ(faq.faq_id)}
+              key={faq.faq_id} 
               style={{ 
-                padding: "14px 16px", 
-                display: "flex", 
-                justifyContent: "space-between", 
-                alignItems: "center", 
-                cursor: "pointer",
-                background: isOpen ? (isDarkTheme ? "rgba(255,255,255,0.05)" : "#f8fafc") : "transparent"
+                border: `1px solid ${isOpen ? colors.primary : theme.border}`,
+                borderRadius: "10px",
+                // Active hone par halka sa background color change hoga
+                background: isOpen ? (isDarkTheme ? "rgba(79, 70, 229, 0.1)" : "#f0fdf4") : theme.cardBg,
+                overflow: "hidden",
+                transition: "all 0.3s ease"
               }}
             >
-              <span style={{ fontSize: "13px", fontWeight: isOpen ? "700" : "600", color: theme.text, flex: 1, paddingRight: "10px", lineHeight: "1.4", fontFamily: typography.fontFamily }}>
-                {faq.question}
-              </span>
-              <div style={{ color: isOpen ? colors.primary : theme.muted, transition: "0.3s" }}>
-                {isOpen ? <MdKeyboardArrowUp size={20} /> : <MdKeyboardArrowDown size={20} />}
-              </div>
-            </div>
-
-            {/* Answer Body */}
-            {isOpen && (
-              <div style={{ 
-                padding: "0 16px 16px 16px", 
-                fontSize: "12px", 
-                color: theme.muted, 
-                lineHeight: "1.6",
-                whiteSpace: "pre-wrap" 
-              }}>
-                <div style={{ marginTop: "4px", paddingTop: "12px", borderTop: `1px dashed ${theme.border}` }}>
-                  {faq.answer}
+              {/* Question Header */}
+              <div 
+                onClick={() => toggleFAQ(faq.faq_id)}
+                style={{ 
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  padding: "16px", cursor: "pointer", userSelect: "none"
+                }}
+              >
+                <h4 style={{ 
+                  margin: 0, fontSize: "14px", fontWeight: isOpen ? "700" : "600", 
+                  color: isOpen ? colors.primary : theme.questionColor,
+                  fontFamily: typography?.fontFamily || "inherit",
+                  lineHeight: "1.4", paddingRight: "16px"
+                }}>
+                  {faq.question}
+                </h4>
+                <div style={{ color: isOpen ? colors.primary : theme.muted, flexShrink: 0 }}>
+                  {isOpen ? <MdKeyboardArrowUp size={20} /> : <MdKeyboardArrowDown size={20} />}
                 </div>
               </div>
-            )}
-          </div>
-        );
-      })}
+              
+              {/* Answer Body */}
+              {isOpen && (
+                <div style={{ padding: "0 16px 16px 16px" }}>
+                  {/* Separator Line */}
+                  <div style={{ height: "1px", background: isOpen ? colors.primary : theme.border, marginBottom: "12px", opacity: 0.2 }} />
+                  
+                  <div style={{ 
+                    color: theme.text, fontSize: "13px", lineHeight: "1.6", 
+                    whiteSpace: "pre-wrap", opacity: 0.9 
+                  }}>
+                    {faq.answer}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

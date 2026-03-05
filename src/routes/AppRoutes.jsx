@@ -5,7 +5,7 @@ import Login from "../modules/auth/Login";
 import ForgotPassword from "../modules/auth/ForgotPassword";
 import VerifyOtp from "../modules/auth/VerifyOtp";
 import ResetPassword from "../modules/auth/ResetPassword";
-
+import SupportPage from "../modules/Help/SupportPage";
 import Dashboard from "../modules/Dashboard/Dashboard";
 import AttendancePage from "../modules/attendance/AttendancePage";
 import Leaves from "../modules/Leaves/Leaves";
@@ -55,6 +55,7 @@ const AppRoutes = () => {
           <Route path="/salary" element={<Salary />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/documents" element={<Documents />} />
+          <Route path="/support" element={<SupportPage  />} />
         </Route>
       </Route>
 

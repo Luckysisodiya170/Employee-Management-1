@@ -2,17 +2,16 @@ import { useState, useEffect } from "react";
 import { MdEmail, MdLock } from "react-icons/md";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
-import Card from "../../components/common/Card";
 import ForgotPassword from "./ForgotPassword";
 import VerifyOtp from "./VerifyOtp";
 import colors from "../../styles/colors";
 import logo from "../../assets/images/AppLogo2.png";
+import image from "../../assets/images/welcome image.png";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./auth.css";
 import { useNavigate } from "react-router-dom";
 import api from "../../utils/api";
-import image from "../../assets/images/welcome image.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -27,14 +26,27 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isBtnHovered, setIsBtnHovered] = useState(false);
 
+  const [playerId, setPlayerId] = useState(null);
+
   useEffect(() => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
     sessionStorage.removeItem("showWelcomeToast");
+
+    // Get OneSignal Player ID from localStorage (set in App.jsx)
+    const storedPlayerId = localStorage.getItem("onesignal_player_id");
+
+    if (storedPlayerId) {
+      setPlayerId(storedPlayerId);
+      console.log("Player ID from storage:", storedPlayerId);
+    } else {
+      console.log("Player ID not found yet");
+    }
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const newErrors = {};
 
     if (!employeeId) newErrors.employeeId = "Employee ID is required";
@@ -50,11 +62,13 @@ const Login = () => {
     setIsLoading(true);
 
     try {
+      console.log("Player ID used in login:", playerId);
+
       const response = await api.post("/auth/login", {
         employee_code: employeeId,
         password,
         device_type: "web",
-        player_id: "web_player_id_123",
+        player_id: playerId || null,
       });
 
       const { status, data, token, user, message } = response.data;
@@ -63,14 +77,17 @@ const Login = () => {
         localStorage.setItem("authToken", token);
         localStorage.setItem("user", JSON.stringify(user || {}));
         sessionStorage.setItem("showWelcomeToast", "true");
+
         navigate("/dashboard");
       } else if (status === "otp_sent" || message?.includes("OTP")) {
         setTempData({
           employee_id: data?.employee_id || response.data.employee_id,
           employee_code: employeeId,
         });
+
         setForgotFlow(false);
         setShowOtp(true);
+
         toast.info("OTP sent to your email.");
       } else {
         toast.error(message || "Invalid credentials provided.");
@@ -78,6 +95,7 @@ const Login = () => {
     } catch (error) {
       const errorMsg =
         error.response?.data?.message || "Wrong Password or Employee ID";
+
       toast.error(errorMsg);
     } finally {
       setIsLoading(false);
@@ -88,34 +106,33 @@ const Login = () => {
     <>
       <style>{`input::-ms-reveal, input::-ms-clear { display: none; }`}</style>
 
-      <div style={pageWrapper}>
-        
-        {/* LEFT SIDE */}
-        <div style={leftSection}>
-          <img src={image} alt="Login Illustration" style={imageStyle} />
-          <div style={{ textAlign: "center" }}>
-  <h1 style={{ fontSize: "28px", marginBottom: "10px" }}>
-    Employee Portal
-  </h1>
-  <p style={{ fontSize: "14px", opacity: 0.7 }}>
-    Manage your work efficiently and securely
-  </p>
-</div>
-        </div>
+      <div className="login-wrapper">
+        <div className="login-card">
+          {/* LEFT SIDE */}
+<div className="login-left">           <img src={image} alt="Login Illustration" className="login-image" />
 
-        {/* RIGHT SIDE */}
-        <div style={rightSection}>
-          <div style={loginContainer}>
-            <Card>
-              <div style={headerSection}>
+            <h1 style={{ fontSize: "28px", marginBottom: "10px" }}>
+              Employee Portal
+            </h1>
+
+            <p style={{ fontSize: "14px", opacity: 0.8 }}>
+              Manage your work efficiently and securely
+            </p>
+          </div>
+
+          {/* RIGHT SIDE */}
+         <div className="login-right">
+<div className="login-form">              <div className="login-header">
                 <img
                   src={logo}
                   alt="logo"
                   width={100}
                   style={{ marginBottom: "10px" }}
                 />
-                <h2 style={titleStyle}>Welcome Back</h2>
-                <p style={subtitleStyle}>Enter your Login Details</p>
+
+             <h2 className="login-title">Welcome Back</h2>
+
+               <p className="login-subtitle">Enter your Login Details</p>
               </div>
 
               <form onSubmit={handleSubmit} style={{ marginTop: "20px" }}>
@@ -138,13 +155,13 @@ const Login = () => {
                   error={errors.password}
                 />
 
-                <div style={forgotPasswordWrapper}>
+              <div className="forgot-wrapper">
                   <span
                     onClick={() => {
                       setForgotFlow(true);
                       setShowForgot(true);
                     }}
-                    style={forgotLinkStyle}
+                    className="forgot-link"
                   >
                     Forgot password?
                   </span>
@@ -160,20 +177,20 @@ const Login = () => {
                     type="submit"
                     disabled={isLoading}
                     style={{
-                      backgroundColor: isBtnHovered
-                        ? "#333333"
-                        : "#000000",
+                      backgroundColor: isBtnHovered ? "#333333" : "#000000",
                       color: "#ffffff",
                       border: "1px solid #000000",
                       transition: "all 0.3s ease",
                       fontWeight: "600",
                       cursor: isLoading ? "not-allowed" : "pointer",
                       opacity: isLoading ? 0.7 : 1,
+                      padding: "12px",
+                      borderRadius: "8px",
                     }}
                   />
                 </div>
               </form>
-            </Card>
+            </div>
           </div>
         </div>
       </div>
@@ -183,6 +200,7 @@ const Login = () => {
           onClose={() => setShowForgot(false)}
           onOtpSent={(id) => {
             if (id) setTempData({ employee_id: id });
+
             setShowForgot(false);
             setShowOtp(true);
           }}
@@ -199,6 +217,7 @@ const Login = () => {
             if (token) {
               localStorage.setItem("authToken", token);
               sessionStorage.setItem("showWelcomeToast", "true");
+
               setShowOtp(false);
               navigate("/dashboard");
             }
@@ -208,26 +227,51 @@ const Login = () => {
     </>
   );
 };
-/* ---------------- STYLES ---------------- */
+
+/* styles unchanged */
+
+
 /* ---------------- STYLES ---------------- */
 
 const pageWrapper = {
-  height: "100vh",
+  minHeight: "100vh",
   width: "100vw",
   display: "flex",
-  overflow: "hidden",
-  fontFamily: "Inter, sans-serif",
+  alignItems: "center",
+  justifyContent: "center",
+  fontFamily: "'Inter', sans-serif",
+  backgroundColor: "#ffffff", 
+};
+
+const cardStyle = {
+  display: "flex",
+  flexDirection: "row", 
+  width: "85%",
+  maxWidth: "1000px", 
+  minHeight: "550px",
+  backgroundColor: "#ffffff",
+  borderRadius: "20px",
+  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)", 
+  overflow: "hidden", 
 };
 
 const leftSection = {
   flex: 1,
-  background: "linear-gradient(135deg, #5a91c9, #000000)",
+  background: "linear-gradient(135deg, #2b5876 0%, #4e4376 100%)", 
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
   padding: "40px",
   color: "#ffffff",
+  textAlign: "center",
+};
+
+const imageStyle = {
+  width: "80%",
+  maxWidth: "350px",
+  height: "auto",
+  marginBottom: "30px",
 };
 
 const rightSection = {
@@ -235,20 +279,13 @@ const rightSection = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  backgroundColor: "#f8f9fc",
+  backgroundColor: "#ffffff",
   padding: "40px",
 };
 
-const imageStyle = {
-  width: "70%",
-  maxWidth: "420px",
-  height: "auto",
-  marginBottom: "20px",
-};
-
-const loginContainer = {
+const formContainer = {
   width: "100%",
-  maxWidth: "380px",
+  maxWidth: "360px", 
 };
 
 const headerSection = {
@@ -258,28 +295,31 @@ const headerSection = {
 
 const titleStyle = {
   margin: 0,
-  fontSize: "24px",
-  fontWeight: "700",
-  color: "#111111",
+  fontSize: "26px",
+  fontWeight: "800",
+  color: "#1a1a1a",
 };
 
 const subtitleStyle = {
   color: "#6c757d",
-  fontSize: "13px",
-  marginTop: "5px",
+  fontSize: "14px",
+  marginTop: "6px",
+  fontWeight: "500",
 };
 
 const forgotPasswordWrapper = {
   display: "flex",
   justifyContent: "flex-end",
   marginTop: "4px",
-  marginBottom: "15px",
+  marginBottom: "20px",
 };
 
 const forgotLinkStyle = {
   cursor: "pointer",
-  color: "#000000",
-  fontSize: "12px",
+  color: "#2b5876", 
+  fontSize: "13px",
   fontWeight: "600",
+  textDecoration: "none",
 };
+
 export default Login;

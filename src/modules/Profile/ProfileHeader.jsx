@@ -9,7 +9,7 @@ const ProfileHeader = ({
   
   // 🔥 Premium Black & White Theme
   const theme = {
-    heroGradient: `linear-gradient(135deg, #000000 0%, #434343 100%)`, // Sleek Black to Dark Grey
+    heroGradient: `linear-gradient(135deg, #3e678e 0%, #3e678e 100%)`, // Sleek Black to Dark Grey
     textWhite: "#ffffff",
     cancelBtn: isDarkTheme ? "#4b5563" : "#6b7280",
     editBtnBg: "rgba(255,255,255,0.15)",
