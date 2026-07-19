@@ -15,7 +15,7 @@ import DocumentPreviewModal from "./DocumentPreviewModal";
 import SupportGrid from "../Help/SupportGrid"; 
 import colors from "../../styles/colors";
 
-// 🔥 UPGRADED DATA MAPPING: Taki saare filters modal mein kaam kar sakein
+// 🔥 UPGRADED DATA MAPPING
 const mapEmployeeData = (data) => {
   const mappedDocs = [
     ...(data.personal_documents || []).map(doc => ({ 
@@ -37,7 +37,6 @@ const mapEmployeeData = (data) => {
     }))
   ];
 
-  // Sort by newest first
   mappedDocs.sort((a, b) => {
     if (a.category === "FORM" && b.category === "FORM") {
        if(a.year !== b.year) return b.year - a.year;
@@ -62,9 +61,29 @@ const mapEmployeeData = (data) => {
   };
 };
 
+// 🚀 DUMMY DATA (Fallback)
+const fallbackDummyData = {
+  name: "Demo User",
+  email: "demo@company.com",
+  phone: "+91 9876543210",
+  address: "123 Tech Street, IT Park",
+  permanentAddress: "456 Home Town, State",
+  designation: "Software Developer",
+  department: "Engineering",
+  employeeId: "EMP-0001",
+  joiningDate: "01/01/2024",
+  organisationName: "Demo Company Pvt Ltd",
+  profilePhotoUrl: null,
+  documents: [
+    { id: "dummy_1", category: "PERSONAL", type: "AADHAAR_CARD", viewUrl: "#", downloadUrl: "#", createdAt: new Date().toISOString() },
+    { id: "dummy_2", category: "FORM", type: "SALARY_SLIP", year: 2024, month: 1, viewUrl: "#", downloadUrl: "#" }
+  ]
+};
+
 const Profile = ({ isDarkTheme }) => {
   const hasFetched = useRef(false);
-  const [employee, setEmployee] = useState(null);
+  // 🚀 Initialize with empty documents array to prevent crash
+  const [employee, setEmployee] = useState({ documents: [] });
   const [loading, setLoading] = useState(true);
   const [profilePhoto, setProfilePhoto] = useState(null);
 
@@ -83,9 +102,14 @@ const Profile = ({ isDarkTheme }) => {
         const mappedData = mapEmployeeData(data);
         setEmployee(mappedData);
         setProfilePhoto(mappedData.profilePhotoUrl);
+      } else {
+        // Fallback if data is empty but API didn't throw error
+        setEmployee(fallbackDummyData);
       }
     } catch (err) {
-      toast.error("Failed to load profile details.");
+      // 🚀 ERROR AANE PAR DUMMY DATA SET HOGA
+      toast.error("API failed. Loading demo profile data.");
+      setEmployee(fallbackDummyData);
     } finally {
       setLoading(false);
     }
@@ -163,7 +187,8 @@ const Profile = ({ isDarkTheme }) => {
             <div style={quickIconBlue}><MdDescription size={20} /></div>
             <div>
               <div style={quickTitle(theme)}>View Documents</div>
-              <div style={quickSub(theme)}>{employee.documents.length} files available</div>
+              {/* 🚀 SAFEGUARD ADDED HERE */}
+              <div style={quickSub(theme)}>{employee.documents?.length || 0} files available</div>
             </div>
           </div>
           <MdKeyboardArrowRight size={20} color={theme.muted} />
@@ -183,7 +208,7 @@ const Profile = ({ isDarkTheme }) => {
       <SupportGrid isDarkTheme={isDarkTheme} />
 
       {/* MODALS */}
-      {showDocsListModal && <DocumentListModal theme={theme} docs={employee.documents} onClose={() => setShowDocsListModal(false)} onPreview={setPreviewDoc} isDarkTheme={isDarkTheme} />}
+      {showDocsListModal && <DocumentListModal theme={theme} docs={employee.documents || []} onClose={() => setShowDocsListModal(false)} onPreview={setPreviewDoc} isDarkTheme={isDarkTheme} />}
       {previewDoc && <DocumentPreviewModal url={previewDoc.viewUrl} type={previewDoc.type} isDarkTheme={isDarkTheme} onClose={() => setPreviewDoc(null)} />}
       
       {showEditModal && <EditProfileModal employee={employee} isDarkTheme={isDarkTheme} onClose={() => setShowEditModal(false)} onSuccess={fetchProfile} />}
@@ -221,7 +246,7 @@ const LogoutModal = ({ theme, onConfirm, onClose }) => (
   </div>
 );
 
-// 🔥 UPGRADED DOCUMENT LIST MODAL (Exactly like Documents.jsx UI)
+// 🔥 UPGRADED DOCUMENT LIST MODAL
 const DocumentListModal = ({ theme, docs, onClose, onPreview, isDarkTheme }) => {
   const [activeTab, setActiveTab] = useState("ALL");
   const [filterYear, setFilterYear] = useState("ALL");

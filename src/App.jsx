@@ -15,47 +15,51 @@ const App = () => {
     const savedTheme = localStorage.getItem("appTheme");
     if (savedTheme === "dark") setIsDarkTheme(true);
   }, []);
+useEffect(() => {
+    const init = async () => {
+      try {
+        // Yahan humne check kiya
+        if (!window.__ONESIGNAL_INIT__) {
+          
+          // 🚀 FIX: Is line ko UPAR move kar diya! Await se pehle lock lagana zaroori hai.
+          window.__ONESIGNAL_INIT__ = true; 
 
-  useEffect(() => {
-  const init = async () => {
-    try {
-      if (!window.__ONESIGNAL_INIT__) {
-        await OneSignal.init({
-          appId: "72686d46-e925-405c-a69f-97e568dd7c42",
-          allowLocalhostAsSecureOrigin: true,
-        });
+          await OneSignal.init({
+            appId: "72686d46-e925-405c-a69f-97e568dd7c42",
+            allowLocalhostAsSecureOrigin: true,
+          });
 
-        window.__ONESIGNAL_INIT__ = true;
+          const perm = await OneSignal.Notifications.permission;
 
-        const perm = await OneSignal.Notifications.permission;
-
-        if (perm !== "granted") {
-          await OneSignal.Notifications.requestPermission();
-        }
-
-        const id = await OneSignal.User.PushSubscription.id;
-
-        if (id) {
-          console.log("OneSignal Player ID:", id);
-          localStorage.setItem("onesignal_player_id", id);
-        }
-
-        OneSignal.User.PushSubscription.addEventListener("change", (event) => {
-          const newId = event?.current?.id;
-
-          if (newId) {
-            console.log("Player ID updated:", newId);
-            localStorage.setItem("onesignal_player_id", newId);
+          if (perm !== "granted") {
+            await OneSignal.Notifications.requestPermission();
           }
-        });
-      }
-    } catch (e) {
-      console.error("OneSignal init error:", e);
-    }
-  };
 
-  init();
-}, []);
+          const id = await OneSignal.User.PushSubscription.id;
+
+          if (id) {
+            console.log("OneSignal Player ID:", id);
+            localStorage.setItem("onesignal_player_id", id);
+          }
+
+          OneSignal.User.PushSubscription.addEventListener("change", (event) => {
+            const newId = event?.current?.id;
+            if (newId) {
+              console.log("Player ID updated:", newId);
+              localStorage.setItem("onesignal_player_id", newId);
+            }
+          });
+        }
+      } catch (e) {
+        // Agar galti se "already initialized" ka error aa bhi jaye, toh app crash na kare
+        if (!e.message?.includes("already initialized")) {
+          console.error("OneSignal init error:", e);
+        }
+      }
+    };
+
+    init();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("appTheme", isDarkTheme ? "dark" : "light");

@@ -5,13 +5,13 @@ import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import colors from "../../styles/colors";
 import typography from "../../styles/typography";
-import api from "../../utils/api"; // 🔥 1. Import API (Replaced usersData)
+import api from "../../utils/api"; // 
 import { toast } from "react-toastify"; 
 
 const ForgotPassword = ({ onClose, onOtpSent, isDarkTheme }) => {
   const [employeeId, setEmployeeId] = useState("");
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // 🔥 Added Loading State
+  const [isLoading, setIsLoading] = useState(false); 
 
   // 🔥 Theme Engine
   const theme = {
